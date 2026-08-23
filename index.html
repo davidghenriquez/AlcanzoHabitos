@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#6d3bff" />
+<title>Creador de Hábitos</title>
+<meta name="description" content="Crea hábitos, mantén tu racha y sube de nivel cada semana." />
+<link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="%236d3bff"/><path d="M20 33l8 8 16-18" stroke="white" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>' />
+<link rel="stylesheet" href="styles.css?v=1" />
+</head>
+<body>
+
+  <!-- Mensaje de error fatal (config de Supabase ausente, fallo de arranque) -->
+  <div class="fatal-error" id="fatalError" hidden></div>
+
+  <!-- PANTALLA DE LOGIN: se muestra cuando no hay sesión de Supabase activa -->
+  <main class="login-gate" id="loginGate" hidden>
+    <div class="login-card">
+      <h1 class="login-title">Creador de Hábitos</h1>
+      <p class="login-subtitle">Crea hábitos, mantén tu racha y sube de nivel cada semana.</p>
+      <button type="button" class="github-btn" id="githubLoginBtn">
+        <svg viewBox="0 0 24 24" class="github-icon" aria-hidden="true">
+          <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.69-1.28-1.69-1.04-.72.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 2.9-.39c.98 0 1.97.13 2.9.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14 0 1.55-.01 2.79-.01 3.17 0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z" />
+        </svg>
+        Entrar con GitHub
+      </button>
+    </div>
+  </main>
+
+  <!-- APP: hábitos, racha, puntos y nivel. Solo visible con sesión activa -->
+  <main class="app-shell" id="appShell" hidden>
+    <header class="app-header">
+      <div>
+        <p class="greeting" id="greetingText">Hola 👋</p>
+        <h1 class="app-title">Creador de Hábitos</h1>
+      </div>
+      <button type="button" class="logout-btn" id="logoutBtn">Cerrar sesión</button>
+    </header>
+
+    <div class="setup-banner" id="setupBanner" hidden></div>
+
+    <section class="level-card">
+      <div class="level-card-top">
+        <div>
+          <p class="level-label">Nivel actual</p>
+          <p class="level-number" id="levelNumber">Nivel 1</p>
+        </div>
+        <div class="level-points">
+          <p class="level-label">Puntos totales</p>
+          <p class="level-points-value" id="totalPoints">0</p>
+        </div>
+      </div>
+      <div class="level-progress-track">
+        <div class="level-progress-bar" id="levelProgressBar" style="width: 0%"></div>
+      </div>
+      <p class="level-progress-text" id="levelProgressText">0 / 100 puntos para el nivel 2</p>
+    </section>
+
+    <section class="habits-section">
+      <p class="habits-empty" id="habitsEmpty" hidden>
+        Todavía no tienes hábitos. ¡Crea el primero abajo!
+      </p>
+      <div class="habits-list" id="habitsList"></div>
+    </section>
+
+    <section class="new-habit-section">
+      <button type="button" class="new-habit-toggle" id="newHabitToggle">+ Nuevo hábito</button>
+
+      <form class="new-habit-form" id="newHabitForm" hidden>
+        <input
+          name="name"
+          class="text-input"
+          placeholder="Nombre del hábito (ej. Leer 10 páginas)"
+          required
+          maxlength="80"
+        />
+        <textarea
+          name="description"
+          class="text-input textarea"
+          placeholder="Descripción (opcional)"
+          maxlength="200"
+          rows="2"
+        ></textarea>
+
+        <div class="new-habit-row">
+          <div class="color-swatches" id="colorSwatches"></div>
+          <label class="points-label">
+            Puntos/día
+            <input name="points_per_completion" type="number" min="1" max="100" value="10" class="points-input" />
+          </label>
+        </div>
+
+        <div class="new-habit-buttons">
+          <button type="button" class="btn-secondary" id="newHabitCancel">Cancelar</button>
+          <button type="submit" class="btn-primary" id="newHabitSubmit">Crear hábito</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" hidden></div>
+  <div class="level-up-banner" id="levelUpBanner" hidden></div>
+
+  <script src="supabase-config.js" onerror="console.warn('supabase-config.js no encontrado — copia supabase-config.example.js')"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

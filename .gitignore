@@ -1,0 +1,46 @@
+# ============================================================
+# Creador de Hábitos .gitignore
+#   - No subimos archivos temporales, logs, ni configuración local
+# ============================================================
+
+# ---- OS / Editor ----
+Thumbs.db
+Desktop.ini
+.DS_Store
+ehthumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+.trae/
+.claude/
+*.suo
+*.user
+
+# ---- Logs & TMP ----
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+*.cache
+
+# ---- Screenshots locales / dev artifacts ----
+screenshots/
+screenshot-*.png
+
+# ---- Configuración local de Supabase (URL + anon key) ----
+# No es un secreto real (la protección de datos la da RLS), pero se
+# mantiene fuera del repo por defecto igual que el resto de configs
+# locales. Si despliegas en un hosting estático, súbelo a mano o con
+# `git add -f supabase-config.js`.
+supabase-config.js
+
+# ---- Node (por si alguien lo usa luego) ----
+node_modules/
+npm-debug.log*
+package-lock.json
+dist/
+build/

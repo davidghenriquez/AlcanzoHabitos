@@ -1,0 +1,439 @@
+/* ============================================================
+   Creador de Hábitos — estilos (sin framework, sin build step).
+   Paleta "brand" = misma escala violeta que se usaba en tailwind.config.
+   ============================================================ */
+
+:root {
+  --brand-50: #f2f0ff;
+  --brand-100: #e6e2ff;
+  --brand-300: #ab9aff;
+  --brand-400: #8768ff;
+  --brand-500: #6d3bff;
+  --brand-600: #5b1df0;
+  --brand-900: #351382;
+
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  --orange-50: #fff7ed;
+  --orange-600: #ea580c;
+  --red-500: #ef4444;
+}
+
+* { box-sizing: border-box; }
+
+/* El atributo hidden debe ganar siempre, aunque el propio elemento
+   tenga otra regla de display (p.ej. .login-gate usa display: flex). */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #ffffff;
+  color: var(--gray-900);
+}
+
+button, input, textarea {
+  font: inherit;
+}
+
+/* ---- Mensaje de error fatal ---- */
+.fatal-error {
+  max-width: 32rem;
+  margin: 4rem auto;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ---- Login gate ---- */
+.login-gate {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  background: linear-gradient(to bottom, var(--brand-50), #ffffff);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 24rem;
+  border-radius: 1rem;
+  border: 1px solid var(--brand-100);
+  background: #fff;
+  padding: 2rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.login-title { font-size: 1.5rem; font-weight: 700; color: var(--brand-900); margin: 0; }
+.login-subtitle { margin-top: 0.5rem; font-size: 0.875rem; color: var(--gray-500); }
+
+.github-btn {
+  margin-top: 2rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  border: 0;
+  background: var(--gray-900);
+  color: #fff;
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.github-btn:hover { background: #374151; }
+.github-icon { width: 1.25rem; height: 1.25rem; fill: currentColor; }
+
+/* ---- App shell ---- */
+.app-shell {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.app-header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.greeting { font-size: 0.875rem; color: var(--gray-500); margin: 0; }
+.app-title { font-size: 1.25rem; font-weight: 700; color: var(--gray-900); margin: 0.1rem 0 0; }
+
+.logout-btn {
+  border-radius: 0.5rem;
+  border: 1px solid var(--gray-200);
+  background: #fff;
+  color: var(--gray-500);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.logout-btn:hover { background: var(--gray-100); }
+
+/* ---- Aviso de configuración pendiente (p.ej. tablas sin crear) ---- */
+.setup-banner {
+  margin-bottom: 1.5rem;
+  border-radius: 1rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  padding: 1rem 1.25rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* ---- Nivel ---- */
+.level-card {
+  margin-bottom: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--brand-100);
+  background: #fff;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.level-card-top { display: flex; align-items: center; justify-content: space-between; }
+.level-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--gray-400);
+}
+.level-card-top > div:first-child .level-label { color: var(--brand-500); }
+.level-number { margin: 0; font-size: 1.875rem; font-weight: 700; color: var(--brand-900); }
+.level-points { text-align: right; }
+.level-points-value { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--gray-800); }
+
+.level-progress-track {
+  margin-top: 1rem;
+  height: 0.75rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--brand-50);
+}
+.level-progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--brand-500);
+  transition: width 0.2s ease;
+}
+.level-progress-text { margin: 0.4rem 0 0; font-size: 0.75rem; color: var(--gray-500); }
+
+/* ---- Hábitos ---- */
+.habits-section { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.habits-empty {
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--gray-400);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.habits-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.habit-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--gray-100);
+  border-left: 4px solid var(--brand-500);
+  background: #fff;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.habit-main { min-width: 0; flex: 1; }
+.habit-title-row { display: flex; align-items: center; gap: 0.5rem; }
+.habit-name {
+  margin: 0;
+  font-weight: 600;
+  color: var(--gray-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.streak-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  border-radius: 999px;
+  background: var(--orange-50);
+  color: var(--orange-600);
+  padding: 0.1rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.habit-description {
+  margin: 0.15rem 0 0;
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.habit-meta { margin: 0.25rem 0 0; font-size: 0.75rem; color: var(--gray-400); }
+
+.habit-actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.habit-toggle {
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 999px;
+  border: 2px solid var(--gray-200);
+  background: #fff;
+  color: var(--gray-300);
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.habit-toggle:hover { border-color: var(--brand-300); }
+.habit-toggle:disabled { opacity: 0.5; cursor: default; }
+.habit-toggle.-done {
+  border-color: var(--brand-500);
+  background: var(--brand-500);
+  color: #fff;
+}
+
+.habit-archive {
+  border: 0;
+  background: none;
+  color: var(--gray-300);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.habit-archive:hover { color: var(--gray-500); }
+.habit-archive:disabled { opacity: 0.5; cursor: default; }
+
+/* ---- Nuevo hábito ---- */
+.new-habit-section { margin-top: 1rem; }
+
+.new-habit-toggle {
+  width: 100%;
+  border-radius: 1rem;
+  border: 2px dashed var(--gray-200);
+  background: none;
+  padding: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-400);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.new-habit-toggle:hover { border-color: var(--brand-300); color: var(--brand-500); }
+
+.new-habit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--gray-100);
+  background: #fff;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.text-input {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--gray-200);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+.text-input:focus { border-color: var(--brand-400); outline: none; }
+.textarea { resize: none; }
+
+.new-habit-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+
+.color-swatches { display: flex; align-items: center; gap: 0.5rem; }
+.color-swatch {
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+.color-swatch.-selected { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--gray-400); }
+
+.points-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+.points-input {
+  width: 4rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--gray-200);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.new-habit-buttons { display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 0.25rem; }
+
+.btn-secondary {
+  border-radius: 0.5rem;
+  border: 0;
+  background: none;
+  color: var(--gray-500);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.btn-secondary:hover { background: var(--gray-50); }
+
+.btn-primary {
+  border-radius: 0.5rem;
+  border: 0;
+  background: var(--brand-500);
+  color: #fff;
+  padding: 0.4rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: var(--brand-600); }
+.btn-primary:disabled { opacity: 0.5; cursor: default; }
+
+/* ---- Confeti (celebración al completar hábitos / subir de nivel) ---- */
+.confetti-burst { position: fixed; width: 0; height: 0; pointer-events: none; z-index: 60; }
+.confetti-piece {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  left: 0;
+  top: 0;
+  border-radius: 2px;
+  opacity: 1;
+  animation: confetti-pop 700ms ease-out forwards;
+}
+@keyframes confetti-pop {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }
+}
+
+/* ---- Mini-calendario semanal (últimos 7 días) por hábito ---- */
+.week-dots { display: flex; gap: 0.3rem; margin-top: 0.5rem; }
+.week-dot {
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 999px;
+  background: var(--gray-200);
+}
+.week-dot.-done { background: var(--brand-500); }
+
+/* ---- Banner de subida de nivel ---- */
+.level-up-banner {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-1rem);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  background: linear-gradient(135deg, var(--brand-500), var(--brand-600));
+  color: #fff;
+  padding: 0.9rem 1.5rem;
+  border-radius: 999px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(109, 59, 255, 0.35);
+  z-index: 70;
+  white-space: nowrap;
+}
+.level-up-banner.-show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---- Toast ---- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 2rem);
+  border-radius: 0.75rem;
+  background: var(--gray-900);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  font-size: 0.8rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+}
