@@ -122,7 +122,16 @@ let newHabitColor = COLORS[0];
 // lastLevel empieza en null: así el primer render (al cargar sesión) nunca
 // dispara la celebración de "subiste de nivel" para un nivel que el usuario
 // ya tenía de antes.
-const state = { user: null, habits: [], completions: [], lastLevel: null };
+const state = {
+  user: null,
+  habits: [],
+  completions: [],
+  lastLevel: null,
+  activeTab: 'habits',
+  calendarMonth: todayUTC(), // día 1 del mes visible en el calendario (siempre normalizado abajo)
+  leaderboard: null,
+  leaderboardError: null,
+};
 
 function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, (c) => (
@@ -147,8 +156,12 @@ function showToast(message) {
   toastTimer = setTimeout(() => { el.hidden = true; }, 4000);
 }
 
-function isMissingTablesError(err) {
-  return err?.code === 'PGRST205' || /could not find the table/i.test(err?.message ?? '');
+function isMissingSetupError(err) {
+  return (
+    err?.code === 'PGRST205' ||
+    err?.code === 'PGRST202' ||
+    /could not find the (table|function)/i.test(err?.message ?? '')
+  );
 }
 
 function showSetupBanner(message) {
@@ -162,7 +175,7 @@ function hideSetupBanner() {
 }
 
 function friendlyError(err) {
-  if (isMissingTablesError(err)) {
+  if (isMissingSetupError(err)) {
     return 'Faltan las tablas en Supabase — ejecuta supabase/schema.sql en el SQL Editor de tu proyecto y recarga la página.';
   }
   return err.message;
@@ -270,7 +283,7 @@ async function loadData() {
 
   const loadError = habitsError || completionsError;
   if (loadError) {
-    if (isMissingTablesError(loadError)) {
+    if (isMissingSetupError(loadError)) {
       showSetupBanner(
         'Falta terminar la configuración de Supabase: las tablas de la base de datos no existen ' +
         'todavía. Ve al SQL Editor de tu proyecto de Supabase y ejecuta el contenido de ' +
@@ -285,7 +298,9 @@ async function loadData() {
   hideSetupBanner();
   state.habits = habits ?? [];
   state.completions = completions ?? [];
+  state.leaderboard = null; // los puntos cambiaron: que el ranking se recargue la próxima vez que se vea
   renderDashboard();
+  if (state.activeTab === 'calendar') renderCalendar();
 }
 
 async function createHabit({ name, description, color, points }) {
@@ -408,8 +423,9 @@ function renderWeekDots(completedDatesSet, color) {
     const key = d.toISOString().slice(0, 10);
     days.push(completedDatesSet.has(key));
   }
+  const safeColor = escapeHtml(color);
   return `<div class="week-dots">${days
-    .map((done) => `<span class="week-dot ${done ? '-done' : ''}" style="${done ? `background:${escapeHtml(color)}` : ''}"></span>`)
+    .map((done) => `<span class="week-dot ${done ? '-done' : ''}" style="${done ? `background:${safeColor};color:${safeColor}` : ''}"></span>`)
     .join('')}</div>`;
 }
 
@@ -447,6 +463,178 @@ function renderHabitCard(habit, streak, completedDatesSet) {
       </div>
     </div>
   `;
+}
+
+// ─────────────────────────────────────────────
+// Calendario: puntos ganados por día, mes a mes. Se deriva de las
+// mismas completaciones que ya tenemos en memoria — sin llamadas
+// nuevas a Supabase.
+// ─────────────────────────────────────────────
+
+const MONTH_FORMATTER = new Intl.DateTimeFormat('es', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+function pointsByDateMap() {
+  const pointsByHabit = new Map(state.habits.map((h) => [h.id, h.points_per_completion]));
+  const map = new Map();
+  for (const c of state.completions) {
+    const pts = pointsByHabit.get(c.habit_id) ?? 0;
+    map.set(c.completed_on, (map.get(c.completed_on) ?? 0) + pts);
+  }
+  return map;
+}
+
+function intensityLevel(points, maxPoints) {
+  if (points <= 0 || maxPoints <= 0) return 0;
+  const ratio = points / maxPoints;
+  if (ratio > 0.75) return 4;
+  if (ratio > 0.5) return 3;
+  if (ratio > 0.25) return 2;
+  return 1;
+}
+
+function changeCalendarMonth(delta) {
+  const year = state.calendarMonth.getUTCFullYear();
+  const month = state.calendarMonth.getUTCMonth();
+  state.calendarMonth = new Date(Date.UTC(year, month + delta, 1));
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const pointsByDate = pointsByDateMap();
+  const year = state.calendarMonth.getUTCFullYear();
+  const month = state.calendarMonth.getUTCMonth();
+
+  document.getElementById('calMonthLabel').textContent = MONTH_FORMATTER.format(state.calendarMonth);
+
+  const firstOfMonth = new Date(Date.UTC(year, month, 1));
+  const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  // getUTCDay(): 0=domingo..6=sábado → offset con la semana empezando en lunes
+  const startOffset = (firstOfMonth.getUTCDay() + 6) % 7;
+
+  const dayPoints = [];
+  let monthTotal = 0;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const key = new Date(Date.UTC(year, month, day)).toISOString().slice(0, 10);
+    const pts = pointsByDate.get(key) ?? 0;
+    monthTotal += pts;
+    dayPoints.push({ day, key, pts });
+  }
+  const maxPoints = Math.max(1, ...dayPoints.map((d) => d.pts));
+  const todayKey = todayUTC().toISOString().slice(0, 10);
+
+  document.getElementById('calMonthTotal').textContent =
+    `${monthTotal} ${monthTotal === 1 ? 'punto' : 'puntos'} este mes`;
+
+  const cells = [];
+  for (let i = 0; i < startOffset; i++) {
+    cells.push('<div class="calendar-cell -empty"></div>');
+  }
+  for (const { day, key, pts } of dayPoints) {
+    const level = intensityLevel(pts, maxPoints);
+    const isToday = key === todayKey;
+    cells.push(`
+      <div class="calendar-cell -level${level} ${isToday ? '-today' : ''}" title="${key}: ${pts} pts">
+        <span class="calendar-cell-day">${day}</span>
+        ${pts > 0 ? `<span class="calendar-cell-pts">${pts}</span>` : ''}
+      </div>
+    `);
+  }
+
+  document.getElementById('calendarGrid').innerHTML = cells.join('');
+}
+
+// ─────────────────────────────────────────────
+// Ranking: compara puntos totales entre todos los usuarios de la app
+// (RPC en Supabase con SECURITY DEFINER — ver supabase/schema.sql).
+// Los hábitos y completaciones de cada quién siguen siendo privados;
+// solo se comparten nombre, avatar y puntos totales.
+// ─────────────────────────────────────────────
+
+async function loadLeaderboard() {
+  renderRankingLoading();
+  const { data, error } = await supabase.rpc('get_leaderboard');
+  if (error) {
+    state.leaderboardError = error;
+    state.leaderboard = null;
+  } else {
+    state.leaderboard = data ?? [];
+    state.leaderboardError = null;
+  }
+  renderRanking();
+}
+
+function renderRankingLoading() {
+  document.getElementById('rankingList').innerHTML = '<p class="ranking-status">Cargando ranking…</p>';
+}
+
+function renderRanking() {
+  const list = document.getElementById('rankingList');
+
+  if (state.leaderboardError) {
+    const message = isMissingSetupError(state.leaderboardError)
+      ? 'El ranking necesita la función get_leaderboard() en Supabase — ejecuta la versión actualizada de supabase/schema.sql y recarga la página.'
+      : friendlyError(state.leaderboardError);
+    list.innerHTML = `<p class="ranking-status">${escapeHtml(message)}</p>`;
+    return;
+  }
+
+  if (!state.leaderboard || state.leaderboard.length === 0) {
+    list.innerHTML = '<p class="ranking-status">Todavía no hay nadie en el ranking.</p>';
+    return;
+  }
+
+  const medals = ['🥇', '🥈', '🥉'];
+  list.innerHTML = state.leaderboard
+    .map((row, i) => {
+      const isMe = row.user_id === state.user.id;
+      const levelInfo = computeLevel(row.total_points);
+      const rankLabel = medals[i] ?? `#${i + 1}`;
+      const initial = escapeHtml((row.username || '?').charAt(0).toUpperCase());
+      const avatar = row.avatar_url
+        ? `<img class="ranking-avatar" src="${escapeHtml(row.avatar_url)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ranking-avatar -placeholder',textContent:'${initial}'}))" />`
+        : `<div class="ranking-avatar -placeholder">${initial}</div>`;
+      return `
+        <div class="ranking-row ${isMe ? '-me' : ''}">
+          <span class="ranking-rank">${rankLabel}</span>
+          ${avatar}
+          <div class="ranking-info">
+            <p class="ranking-name">${escapeHtml(row.username)}${isMe ? ' <span class="ranking-you-tag">Tú</span>' : ''}</p>
+            <p class="ranking-level">${levelEmoji(levelInfo.level)} Nivel ${levelInfo.level}</p>
+          </div>
+          <span class="ranking-points">${row.total_points} pts</span>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+// ─────────────────────────────────────────────
+// Pestañas
+// ─────────────────────────────────────────────
+
+function setActiveTab(tab) {
+  state.activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
+    btn.classList.toggle('-active', btn.dataset.tab === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach((panel) => {
+    panel.hidden = panel.dataset.panel !== tab;
+  });
+
+  if (tab === 'calendar') renderCalendar();
+  if (tab === 'ranking' && state.leaderboard === null) loadLeaderboard();
+}
+
+function wireTabs() {
+  document.getElementById('tabBar').addEventListener('click', (event) => {
+    const btn = event.target.closest('.tab-btn');
+    if (!btn) return;
+    setActiveTab(btn.dataset.tab);
+  });
+
+  document.getElementById('calPrevMonth').addEventListener('click', () => changeCalendarMonth(-1));
+  document.getElementById('calNextMonth').addEventListener('click', () => changeCalendarMonth(1));
+  document.getElementById('rankingRefresh').addEventListener('click', () => loadLeaderboard());
 }
 
 // ─────────────────────────────────────────────
@@ -581,6 +769,7 @@ async function init() {
   supabase = createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
   renderColorSwatches();
   wireStaticEvents();
+  wireTabs();
 
   supabase.auth.onAuthStateChange((_event, session) => {
     state.user = session?.user ?? null;
