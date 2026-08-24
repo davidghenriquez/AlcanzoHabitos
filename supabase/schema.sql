@@ -22,18 +22,22 @@ create index if not exists habits_user_id_idx on public.habits (user_id);
 
 alter table public.habits enable row level security;
 
+drop policy if exists "Los usuarios pueden ver sus propios hábitos" on public.habits;
 create policy "Los usuarios pueden ver sus propios hábitos"
   on public.habits for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Los usuarios pueden crear sus propios hábitos" on public.habits;
 create policy "Los usuarios pueden crear sus propios hábitos"
   on public.habits for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Los usuarios pueden editar sus propios hábitos" on public.habits;
 create policy "Los usuarios pueden editar sus propios hábitos"
   on public.habits for update
   using (auth.uid() = user_id);
 
+drop policy if exists "Los usuarios pueden borrar sus propios hábitos" on public.habits;
 create policy "Los usuarios pueden borrar sus propios hábitos"
   on public.habits for delete
   using (auth.uid() = user_id);
@@ -55,14 +59,17 @@ create index if not exists habit_completions_user_id_idx on public.habit_complet
 
 alter table public.habit_completions enable row level security;
 
+drop policy if exists "Los usuarios pueden ver sus propias completaciones" on public.habit_completions;
 create policy "Los usuarios pueden ver sus propias completaciones"
   on public.habit_completions for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Los usuarios pueden registrar sus propias completaciones" on public.habit_completions;
 create policy "Los usuarios pueden registrar sus propias completaciones"
   on public.habit_completions for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Los usuarios pueden borrar sus propias completaciones" on public.habit_completions;
 create policy "Los usuarios pueden borrar sus propias completaciones"
   on public.habit_completions for delete
   using (auth.uid() = user_id);
@@ -83,11 +90,13 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+drop policy if exists "Cualquier usuario autenticado puede ver los perfiles" on public.profiles;
 create policy "Cualquier usuario autenticado puede ver los perfiles"
   on public.profiles for select
   to authenticated
   using (true);
 
+drop policy if exists "Los usuarios pueden editar su propio perfil" on public.profiles;
 create policy "Los usuarios pueden editar su propio perfil"
   on public.profiles for update
   using (auth.uid() = id);
